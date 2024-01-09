@@ -26,9 +26,9 @@ pub struct Interaction {
     #[serde(rename = "m")]
     pub interaction_method: InteractionMethod,
     #[serde(rename = "c")]
-    context: Context,
+    pub context: Context,
     #[serde(rename = "a")]
-    attr_properties: BTreeMap<String, Properties>,
+    pub attr_properties: BTreeMap<String, Properties>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -47,7 +47,7 @@ pub enum AttrType {
 
 #[serde(rename_all = "lowercase")]
 #[derive(Debug, Serialize, Deserialize, Clone)]
-enum Context {
+pub enum Context {
     Capture,
 }
 #[serde(rename_all = "lowercase")]
