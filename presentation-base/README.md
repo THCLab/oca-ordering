@@ -1,1 +1,1 @@
-Library providing simpel data structure for OCA presentation
+Library providing simple data structure for OCA presentation

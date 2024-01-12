@@ -4,6 +4,8 @@ use isolang::Language;
 use said::sad::{SerializationFormats, SAD};
 use serde::{Deserialize, Serialize};
 
+use crate::page::Page;
+
 #[derive(Debug, SAD, Serialize, Deserialize)]
 pub struct Presentation {
     #[serde(rename = "bd")]
@@ -12,7 +14,7 @@ pub struct Presentation {
     #[serde(rename = "d")]
     pub said: Option<said::SelfAddressingIdentifier>,
     #[serde(rename = "p")]
-    pub pages: BTreeMap<String, Vec<String>>,
+    pub pages: Vec<Page>,
     #[serde(rename = "po")]
     pub pages_order: Vec<String>,
     #[serde(rename = "pl")]
@@ -59,16 +61,24 @@ pub enum InteractionMethod {
 
 #[cfg(test)]
 mod tests {
+    use crate::page::PageElement;
+
     use super::*;
 
     #[test]
     fn test_presentation_base() {
-        let mut pages = BTreeMap::new();
-        pages.insert("pageY".to_string(), vec!["attr_1".to_string()]);
-        pages.insert(
-            "pageZ".to_string(),
-            vec!["attr_3".to_string(), "attr_2".to_string()],
-        );
+        let page_y = Page {
+            name: "pageY".to_string(),
+            ao: vec![PageElement::Value("attr_1".to_string())],
+        };
+        let page_z = Page {
+            name: "pageZ".to_string(),
+            ao: vec![
+                PageElement::Value("attr_3".to_string()),
+                PageElement::Value("attr_2".to_string()),
+            ],
+        };
+        let pages = vec![page_y, page_z];
 
         let mut pages_label = BTreeMap::new();
         let mut pages_label_en = BTreeMap::new();
@@ -95,7 +105,7 @@ mod tests {
                 )]
                 .into_iter()
                 .collect(),
-            }]
+            }],
         };
 
         presentation_base.compute_digest();
@@ -106,7 +116,7 @@ mod tests {
         );
         assert_eq!(
             presentation_base.said.unwrap().to_string(),
-            "EBDKqlEFqzmW00Q6PzsqXb0rPTXeCqYcHS1kwhg76LiF".to_string()
+            "EKqOPrmvf4GEp8ec9KKxig0TdFTGqNo0zAlFIjut6z7Z".to_string()
         );
     }
 }
