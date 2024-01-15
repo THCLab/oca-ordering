@@ -4,7 +4,8 @@ use serde::{Deserialize, Serialize};
 pub struct Page {
     #[serde(rename = "n")]
     pub name: String,
-    pub ao: Vec<PageElement>,
+    #[serde(rename = "ao")]
+    pub attribute_order: Vec<PageElement>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -16,7 +17,7 @@ pub enum PageElement {
 
 #[test]
 fn page_example() {
-    let pahe = r#"{
+    let page = r#"{
               "n": "page1",
               "ao": [
                 "passed",
@@ -36,8 +37,8 @@ fn page_example() {
               ]
             }"#;
 
-    let page_deser: Page = serde_json::from_str(pahe).unwrap();
-    let mut page_no_whitespace = pahe.to_string();
+    let page_deser: Page = serde_json::from_str(page).unwrap();
+    let mut page_no_whitespace = page.to_string();
     page_no_whitespace.retain(|c| !c.is_whitespace());
     assert_eq!(
         page_no_whitespace,

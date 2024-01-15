@@ -1,17 +1,23 @@
 use std::collections::BTreeMap;
 
 use isolang::Language;
-use said::sad::{SerializationFormats, SAD};
-use serde::{Deserialize, Serialize};
+use said::{
+    sad::{SerializationFormats, SAD},
+    SelfAddressingIdentifier,
+};
+use serde::{Deserialize, Deserializer, Serialize};
 
 use crate::page::Page;
 
 #[derive(Debug, SAD, Serialize, Deserialize)]
 pub struct Presentation {
+    #[serde(rename = "v")]
+    pub version: String,
     #[serde(rename = "bd")]
     pub bundle_digest: said::SelfAddressingIdentifier,
     #[said]
     #[serde(rename = "d")]
+    #[serde(deserialize_with = "empty_string_is_none")]
     pub said: Option<said::SelfAddressingIdentifier>,
     #[serde(rename = "p")]
     pub pages: Vec<Page>,
@@ -59,6 +65,20 @@ pub enum InteractionMethod {
     Ai,
 }
 
+fn empty_string_is_none<'de, D>(
+    deserializer: D,
+) -> Result<Option<SelfAddressingIdentifier>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s = String::deserialize(deserializer)?;
+    if s.is_empty() {
+        Ok(None)
+    } else {
+        Ok(Some(s.parse().unwrap()))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::page::PageElement;
@@ -69,11 +89,11 @@ mod tests {
     fn test_presentation_base() {
         let page_y = Page {
             name: "pageY".to_string(),
-            ao: vec![PageElement::Value("attr_1".to_string())],
+            attribute_order: vec![PageElement::Value("attr_1".to_string())],
         };
         let page_z = Page {
             name: "pageZ".to_string(),
-            ao: vec![
+            attribute_order: vec![
                 PageElement::Value("attr_3".to_string()),
                 PageElement::Value("attr_2".to_string()),
             ],
@@ -87,6 +107,7 @@ mod tests {
         pages_label.insert(Language::Eng, pages_label_en);
 
         let mut presentation_base = Presentation {
+            version: "1.0.0".to_string(),
             bundle_digest: "EHp19U2U1sdOBmPzMmILM3DUI0PQph9tdN3KtmBrvNV7"
                 .parse()
                 .unwrap(),
@@ -114,9 +135,60 @@ mod tests {
             "{}",
             serde_json::to_string_pretty(&presentation_base).unwrap()
         );
+        let der_data = presentation_base.derivation_data();
+        let sai = presentation_base.said.unwrap();
+        assert!(sai.verify_binding(&der_data));
         assert_eq!(
-            presentation_base.said.unwrap().to_string(),
-            "EKqOPrmvf4GEp8ec9KKxig0TdFTGqNo0zAlFIjut6z7Z".to_string()
+            sai.to_string(),
+            "EEH1HiTzmFoX58oNnJpKSdKrQ4LQ6WsTzdV_eUz-tF1H".to_string()
         );
+    }
+
+    #[test]
+    fn test_deserialize() {
+        let input = r#"{
+  "v":"1.0.0",
+  "bd": "EHp19U2U1sdOBmPzMmILM3DUI0PQph9tdN3KtmBrvNV7",
+  "d": "",
+  "p": [
+    {
+      "n": "pageY",
+      "ao": [
+        "attr_1"
+      ]
+    },
+    {
+      "n": "pageZ",
+      "ao": [
+        "attr_3",
+        "attr_2"
+      ]
+    }
+  ],
+  "po": [
+    "pageY",
+    "pageZ"
+  ],
+  "pl": {
+    "eng": {
+      "pageY": "Page Y",
+      "pageZ": "Page Z"
+    }
+  },
+  "i": [
+    {
+      "m": "web",
+      "c": "capture",
+      "a": {
+        "attr_1": {
+          "t": "textarea"
+        }
+      }
+    }
+  ]
+}"#;
+
+        let pres: Presentation = serde_json::from_str(input).unwrap();
+        assert!(pres.said.is_none());
     }
 }
