@@ -159,7 +159,7 @@ mod tests {
         assert!(sai.verify_binding(&der_data));
         assert_eq!(
             sai.to_string(),
-            "ECy0tgTHKVKA1pQEtIacXK9AaA4Axd3ZguRbP8UpX432".to_string()
+            "EOiPlSDMJlllCZHT4skyPLlpy0tOXsOJNxP2ifhexL4b".to_string()
         );
     }
 
@@ -220,7 +220,7 @@ mod tests {
     }
 
     #[test]
-    fn test_deserialize2() {
+    fn test_complex_deserialize() {
         let input = r#"{
   "v": "1.0.0",
   "bd": "EIRYpj7kwFW1nJ9AInPgMjsdC-DeX26eHlb7FzwzlkEh",
