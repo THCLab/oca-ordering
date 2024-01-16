@@ -69,21 +69,21 @@ pub struct Properties {
     pub type_: AttrType,
 }
 
-#[serde(rename_all = "lowercase")]
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "lowercase")]
 pub enum AttrType {
     TextArea,
     Signature,
     File,
 }
 
-#[serde(rename_all = "lowercase")]
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "lowercase")]
 pub enum Context {
     Capture,
 }
-#[serde(rename_all = "lowercase")]
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "lowercase")]
 pub enum InteractionMethod {
     Web,
     Ai,
