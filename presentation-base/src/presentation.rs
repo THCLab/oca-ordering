@@ -9,6 +9,14 @@ use serde::{Deserialize, Deserializer, Serialize};
 
 use crate::page::Page;
 
+#[derive(Debug, thiserror::Error)]
+pub enum PresentationError {
+    #[error("Said doesn't match presentation")]
+    SaidDoesNotMatch,
+    #[error("`d` field is empty")]
+    MissingSaid,
+}
+
 #[derive(Debug, SAD, Serialize, Deserialize)]
 pub struct Presentation {
     #[serde(rename = "v")]
@@ -27,6 +35,22 @@ pub struct Presentation {
     pub pages_label: BTreeMap<Language, BTreeMap<String, String>>,
     #[serde(rename = "i")]
     pub interaction: Vec<Interaction>,
+}
+
+impl Presentation {
+    pub fn validate_digest(&self) -> Result<(), PresentationError> {
+        let der_data = self.derivation_data();
+        if self
+            .said
+            .as_ref()
+            .ok_or(PresentationError::MissingSaid)?
+            .verify_binding(&der_data)
+        {
+            Ok(())
+        } else {
+            Err(PresentationError::SaidDoesNotMatch)
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
