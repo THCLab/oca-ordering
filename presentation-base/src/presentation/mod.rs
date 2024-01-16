@@ -24,7 +24,7 @@ pub struct Presentation {
     #[serde(rename = "bd")]
     pub bundle_digest: said::SelfAddressingIdentifier,
     #[serde(rename = "l")]
-    pub languages: Vec<String>,
+    pub languages: Vec<Language>,
     #[said]
     #[serde(rename = "d")]
     #[serde(deserialize_with = "opt_serialization::empty_str_as_none")]
@@ -129,7 +129,7 @@ mod tests {
             bundle_digest: "EHp19U2U1sdOBmPzMmILM3DUI0PQph9tdN3KtmBrvNV7"
                 .parse()
                 .unwrap(),
-            languages: vec!["eng".to_string(), "pol".to_string(), "deu".to_string()],
+            languages: vec![Language::Eng,  Language::Pol,  Language::Deu],
             said: None,
             pages,
             pages_order: vec!["pageY".to_string(), "pageZ".to_string()],
