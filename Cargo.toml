@@ -3,3 +3,4 @@
 members = [
   "presentation-base"
 ]
+resolver = "2"

@@ -15,6 +15,7 @@ name = "oca_presentation"
 path = "src/lib.rs"
 
 [dependencies]
+indexmap = { version = "2.1.0", features = ["serde"] }
 isolang = { version = "2.3.0", features = ["serde"] }
 said = { version = "0.3.0", features = ["macros"] }
 serde = { version = "1.0", features = ["derive"] }

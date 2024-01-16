@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use serialization::opt_serialization;
 
 use crate::page::Page;
+use indexmap::IndexMap;
 mod serialization;
 
 #[derive(Debug, thiserror::Error)]
@@ -33,7 +34,7 @@ pub struct Presentation {
     #[serde(rename = "po")]
     pub pages_order: Vec<String>,
     #[serde(rename = "pl")]
-    pub pages_label: BTreeMap<Language, BTreeMap<String, String>>,
+    pub pages_label: IndexMap<Language, BTreeMap<String, String>>,
     #[serde(rename = "i")]
     pub interaction: Vec<Interaction>,
 }
@@ -61,25 +62,27 @@ pub struct Interaction {
     #[serde(rename = "c")]
     pub context: Context,
     #[serde(rename = "a")]
-    pub attr_properties: BTreeMap<String, Properties>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Properties {
-    #[serde(rename = "t")]
-    pub type_: AttrType,
+    pub attr_properties: IndexMap<String, AttrType>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "lowercase")]
+#[serde(tag = "t")]
 pub enum AttrType {
     TextArea,
     Signature,
     File,
-    Radio,
+    Radio { o: Orientation },
     Time,
     DateTime,
     Date,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum Orientation {
+    Horizontal,
+    Vertical,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -96,8 +99,6 @@ pub enum InteractionMethod {
 
 #[cfg(test)]
 mod tests {
-    use std::{fs::File, io::Write};
-
     use crate::page::PageElement;
 
     use super::*;
@@ -117,7 +118,7 @@ mod tests {
         };
         let pages = vec![page_y, page_z];
 
-        let mut pages_label = BTreeMap::new();
+        let mut pages_label = IndexMap::new();
         let mut pages_label_en = BTreeMap::new();
         pages_label_en.insert("pageY".to_string(), "Page Y".to_string());
         pages_label_en.insert("pageZ".to_string(), "Page Z".to_string());
@@ -138,8 +139,8 @@ mod tests {
                 context: Context::Capture,
                 attr_properties: vec![(
                     "attr_1".to_string(),
-                    Properties {
-                        type_: AttrType::TextArea,
+                    AttrType::Radio {
+                        o: Orientation::Horizontal,
                     },
                 )]
                 .into_iter()
@@ -223,12 +224,24 @@ mod tests {
         let input = r#"{
   "v": "1.0.0",
   "bd": "EIRYpj7kwFW1nJ9AInPgMjsdC-DeX26eHlb7FzwzlkEh",
-  "l": ["eng", "pol", "deu"],
+  "l": [
+    "eng", 
+    "pol", 
+    "deu"
+    ],
   "d": "",
   "p": [
     {
       "n": "page 2",
-      "ao": ["select", "i", "img", "num", "date", "time", "nice_attr"]
+      "ao": [
+        "select", 
+        "i", 
+        "img", 
+        "num", 
+        "date", 
+        "time", 
+        "nice_attr"
+        ]
     },
     {
       "n": "page 1",
@@ -243,7 +256,18 @@ mod tests {
             "surname",
             {
               "n": "building",
-              "ao": ["floors", "area", { "n": "address", "ao": ["city", "zip", "street"] }]
+              "ao": [
+                "floors", 
+                "area", 
+                { 
+                  "n": "address", 
+                  "ao": [
+                    "city", 
+                    "zip", 
+                    "street"
+                    ] 
+                }
+                ]
             }
           ]
         }
@@ -265,8 +289,14 @@ mod tests {
               "n": "manufacturer",
               "ao": [
                 "name",
-                { "n": "address", "ao": ["city", "zip"] },
-                { "n": "parts", "ao": ["name"] }
+                { 
+                  "n": "address", 
+                  "ao": ["city", "zip"] 
+                },
+                { 
+                  "n": "parts", 
+                  "ao": ["name"] 
+                }
               ]
             }
           ]
@@ -275,10 +305,20 @@ mod tests {
     },
     {
       "n": "page 4",
-      "ao": ["text_attr1", "radio1", "text_attr2", "radio2"]
+      "ao": [
+        "text_attr1", 
+        "radio1", 
+        "text_attr2", 
+        "radio2"
+        ]
     }
   ],
-  "po": ["page 1", "page 2", "page 3", "page 4"],
+  "po": [
+    "page 1", 
+    "page 2", 
+    "page 3", 
+    "page 4"
+    ],
   "pl": {
     "eng": {
       "page 1": "First page",
@@ -304,15 +344,35 @@ mod tests {
       "m": "web",
       "c": "capture",
       "a": {
-        "d": { "t": "textarea" },
-        "img": { "t": "file" },
-        "sign": { "t": "signature" },
-        "radio1": { "t": "radio", "o": "vertical" },
-        "radio2": { "t": "radio", "o": "horizontal" },
-        "date": { "t": "date" },
-        "time": { "t": "time" },
-        "list_date": { "t": "datetime" },
-        "customer.building.address.street": { "t": "textarea" }
+        "d": { 
+          "t": "textarea" 
+        },
+        "img": { 
+          "t": "file" 
+        },
+        "sign": { 
+          "t": "signature" 
+        },
+        "radio1": { 
+          "t": "radio", 
+          "o": "vertical" 
+        },
+        "radio2": { 
+          "t": "radio", 
+          "o": "horizontal" 
+        },
+        "date": { 
+          "t": "date" 
+        },
+        "time": { 
+          "t": "time" 
+        },
+        "list_date": { 
+          "t": "datetime" 
+        },
+        "customer.building.address.street": { 
+          "t": "textarea" 
+        }
       }
     }
   ]
@@ -323,13 +383,6 @@ mod tests {
         assert!(pres.said.is_none());
 
         let mut serialized = serde_json::to_string_pretty(&pres).unwrap();
-        // println!("{}", input);
-        let mut file = File::create("1.json").unwrap();
-        file.write_all(input.as_bytes()).unwrap();
-
-        // println!("\n{}", serialized);
-        let mut file = File::create("2.json").unwrap();
-        file.write_all(serialized.as_bytes()).unwrap();
         serialized.retain(|c| !c.is_whitespace());
         let mut expected = input.to_string();
         expected.retain(|c| !c.is_whitespace());
