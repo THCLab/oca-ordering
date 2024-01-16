@@ -5,6 +5,7 @@ use said::{
     sad::{SerializationFormats, SAD},
     SelfAddressingIdentifier,
 };
+use serde::de::Error;
 use serde::{Deserialize, Deserializer, Serialize};
 
 use crate::page::Page;
@@ -99,7 +100,8 @@ where
     if s.is_empty() {
         Ok(None)
     } else {
-        Ok(Some(s.parse().unwrap()))
+        let parsed = s.parse().map_err(D::Error::custom)?;
+        Ok(Some(parsed))
     }
 }
 
