@@ -1,14 +1,12 @@
 use std::collections::BTreeMap;
 
 use isolang::Language;
-use said::{
-    sad::{SerializationFormats, SAD},
-    SelfAddressingIdentifier,
-};
-use serde::de::Error;
-use serde::{Deserialize, Deserializer, Serialize};
+use said::sad::{SerializationFormats, SAD};
+use serde::{Deserialize, Serialize};
+use serialization::opt_serialization;
 
 use crate::page::Page;
+mod serialization;
 
 #[derive(Debug, thiserror::Error)]
 pub enum PresentationError {
@@ -18,15 +16,17 @@ pub enum PresentationError {
     MissingSaid,
 }
 
-#[derive(Debug, SAD, Serialize, Deserialize)]
+#[derive(Debug, SAD, Deserialize)]
 pub struct Presentation {
     #[serde(rename = "v")]
     pub version: String,
     #[serde(rename = "bd")]
     pub bundle_digest: said::SelfAddressingIdentifier,
+    #[serde(rename = "l")]
+    pub languages: Vec<String>,
     #[said]
     #[serde(rename = "d")]
-    #[serde(deserialize_with = "empty_string_is_none")]
+    #[serde(deserialize_with = "opt_serialization::empty_str_as_none")]
     pub said: Option<said::SelfAddressingIdentifier>,
     #[serde(rename = "p")]
     pub pages: Vec<Page>,
@@ -76,6 +76,10 @@ pub enum AttrType {
     TextArea,
     Signature,
     File,
+    Radio,
+    Time,
+    DateTime,
+    Date,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -90,23 +94,10 @@ pub enum InteractionMethod {
     Ai,
 }
 
-fn empty_string_is_none<'de, D>(
-    deserializer: D,
-) -> Result<Option<SelfAddressingIdentifier>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let s = String::deserialize(deserializer)?;
-    if s.is_empty() {
-        Ok(None)
-    } else {
-        let parsed = s.parse().map_err(D::Error::custom)?;
-        Ok(Some(parsed))
-    }
-}
-
 #[cfg(test)]
 mod tests {
+    use std::{fs::File, io::Write};
+
     use crate::page::PageElement;
 
     use super::*;
@@ -137,6 +128,7 @@ mod tests {
             bundle_digest: "EHp19U2U1sdOBmPzMmILM3DUI0PQph9tdN3KtmBrvNV7"
                 .parse()
                 .unwrap(),
+            languages: vec!["eng".to_string(), "pol".to_string(), "deu".to_string()],
             said: None,
             pages,
             pages_order: vec!["pageY".to_string(), "pageZ".to_string()],
@@ -166,7 +158,7 @@ mod tests {
         assert!(sai.verify_binding(&der_data));
         assert_eq!(
             sai.to_string(),
-            "EEH1HiTzmFoX58oNnJpKSdKrQ4LQ6WsTzdV_eUz-tF1H".to_string()
+            "ECy0tgTHKVKA1pQEtIacXK9AaA4Axd3ZguRbP8UpX432".to_string()
         );
     }
 
@@ -175,6 +167,7 @@ mod tests {
         let input = r#"{
   "v":"1.0.0",
   "bd": "EHp19U2U1sdOBmPzMmILM3DUI0PQph9tdN3KtmBrvNV7",
+  "l": ["eng", "pol", "deu"],
   "d": "",
   "p": [
     {
@@ -216,5 +209,131 @@ mod tests {
 
         let pres: Presentation = serde_json::from_str(input).unwrap();
         assert!(pres.said.is_none());
+
+        let mut serialized = serde_json::to_string_pretty(&pres).unwrap();
+        serialized.retain(|c| !c.is_whitespace());
+        let mut expected = input.to_string();
+        expected.retain(|c| !c.is_whitespace());
+
+        assert_eq!(serialized, expected);
+    }
+
+    #[test]
+    fn test_deserialize2() {
+        let input = r#"{
+  "v": "1.0.0",
+  "bd": "EIRYpj7kwFW1nJ9AInPgMjsdC-DeX26eHlb7FzwzlkEh",
+  "l": ["eng", "pol", "deu"],
+  "d": "",
+  "p": [
+    {
+      "n": "page 2",
+      "ao": ["select", "i", "img", "num", "date", "time", "nice_attr"]
+    },
+    {
+      "n": "page 1",
+      "ao": [
+        "passed",
+        "d",
+        "sign",
+        {
+          "n": "customer",
+          "ao": [
+            "name",
+            "surname",
+            {
+              "n": "building",
+              "ao": ["floors", "area", { "n": "address", "ao": ["city", "zip", "street"] }]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "n": "page 3",
+      "ao": [
+        "list_text",
+        "list_num",
+        "list_bool",
+        "list_date",
+        {
+          "n": "devices",
+          "ao": [
+            "name",
+            "description",
+            {
+              "n": "manufacturer",
+              "ao": [
+                "name",
+                { "n": "address", "ao": ["city", "zip"] },
+                { "n": "parts", "ao": ["name"] }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "n": "page 4",
+      "ao": ["text_attr1", "radio1", "text_attr2", "radio2"]
+    }
+  ],
+  "po": ["page 1", "page 2", "page 3", "page 4"],
+  "pl": {
+    "eng": {
+      "page 1": "First page",
+      "page 2": "Second page",
+      "page 3": "Third page",
+      "page 4": "Radio/checkbox page"
+    },
+    "pol": {
+      "page 1": "Pierwsza strona",
+      "page 2": "Druga strona",
+      "page 3": "Trzecia strona",
+      "page 4": "Radio/checkbox strona"
+    },
+    "deu": {
+      "page 1": "Erste Seite",
+      "page 2": "Zweite Seite",
+      "page 3": "Dritte Seite",
+      "page 4": "Radio/checkbox Seite"
+    }
+  },
+  "i": [
+    {
+      "m": "web",
+      "c": "capture",
+      "a": {
+        "d": { "t": "textarea" },
+        "img": { "t": "file" },
+        "sign": { "t": "signature" },
+        "radio1": { "t": "radio", "o": "vertical" },
+        "radio2": { "t": "radio", "o": "horizontal" },
+        "date": { "t": "date" },
+        "time": { "t": "time" },
+        "list_date": { "t": "datetime" },
+        "customer.building.address.street": { "t": "textarea" }
+      }
+    }
+  ]
+}
+"#;
+
+        let pres: Presentation = serde_json::from_str(input).unwrap();
+        assert!(pres.said.is_none());
+
+        let mut serialized = serde_json::to_string_pretty(&pres).unwrap();
+        // println!("{}", input);
+        let mut file = File::create("1.json").unwrap();
+        file.write_all(input.as_bytes()).unwrap();
+
+        // println!("\n{}", serialized);
+        let mut file = File::create("2.json").unwrap();
+        file.write_all(serialized.as_bytes()).unwrap();
+        serialized.retain(|c| !c.is_whitespace());
+        let mut expected = input.to_string();
+        expected.retain(|c| !c.is_whitespace());
+
+        assert_eq!(serialized, expected);
     }
 }
