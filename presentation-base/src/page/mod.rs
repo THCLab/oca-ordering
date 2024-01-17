@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+pub mod recursion_setup;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Page {
@@ -8,11 +9,16 @@ pub struct Page {
     pub attribute_order: Vec<PageElement>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(untagged)]
 pub enum PageElement {
     Value(String),
-    Page(Page),
+    Page {
+        #[serde(rename = "n")]
+        name: String,
+        #[serde(rename = "ao")]
+        attribute_order: Vec<PageElement>,
+    },
 }
 
 #[test]

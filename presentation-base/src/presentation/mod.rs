@@ -129,7 +129,7 @@ mod tests {
             bundle_digest: "EHp19U2U1sdOBmPzMmILM3DUI0PQph9tdN3KtmBrvNV7"
                 .parse()
                 .unwrap(),
-            languages: vec![Language::Eng,  Language::Pol,  Language::Deu],
+            languages: vec![Language::Eng, Language::Pol, Language::Deu],
             said: None,
             pages,
             pages_order: vec!["pageY".to_string(), "pageZ".to_string()],
