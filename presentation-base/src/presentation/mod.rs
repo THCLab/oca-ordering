@@ -78,6 +78,7 @@ pub enum AttrType {
     Date,
     #[serde(rename = "code_scanner")]
     CodeScanner,
+    Select { va: Cardinality },
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -85,6 +86,12 @@ pub enum AttrType {
 pub enum Orientation {
     Horizontal,
     Vertical,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum Cardinality {
+    Multiple,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
