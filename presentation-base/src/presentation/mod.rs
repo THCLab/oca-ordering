@@ -76,6 +76,8 @@ pub enum AttrType {
     Time,
     DateTime,
     Date,
+    #[serde(rename = "code_scanner")]
+    CodeScanner,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
