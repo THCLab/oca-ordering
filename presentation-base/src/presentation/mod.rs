@@ -70,15 +70,36 @@ pub struct Interaction {
 #[serde(tag = "t")]
 pub enum AttrType {
     TextArea,
-    Signature,
+    Signature {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        m: Option<SignatureMetadata>,
+    },
     File,
-    Radio { o: Orientation },
+    Radio {
+        o: Orientation,
+    },
     Time,
     DateTime,
     Date,
     #[serde(rename = "code_scanner")]
     CodeScanner,
-    Select { va: Cardinality },
+    Select {
+        va: Cardinality,
+    },
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct SignatureMetadata {
+    canvas: String,
+    geolocation: Geolocation,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Geolocation {
+    latitude: String,
+    longitude: String,
+    accuracy: String,
+    timestamp: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

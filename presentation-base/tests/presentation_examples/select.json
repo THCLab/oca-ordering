@@ -1,0 +1,44 @@
+{
+  "v": "1.0.0",
+  "bd": "EG3s_Mu_DNK1awoe29rsB2EUKoYdOUyLKLOJ0xI3vHwK",
+  "l": [
+    "deu",
+    "eng",
+    "pol"
+  ],
+  "d": "EHxAZUjCot4x9aR4eQUKm418sbonWK4YvvZ9cfSPMNyN",
+  "p": [
+    {
+      "n": "Intervention",
+      "ao": [
+        "reason"
+      ]
+    }
+  ],
+  "po": [
+    "Intervention"
+  ],
+  "pl": {
+    "eng": {
+      "Intervention": "Intervention data"
+    },
+    "deu": {
+      "Intervention": "Einsatzdaten"
+    },
+    "pol": {
+      "Intervention": "Dane interwencji"
+    }
+  },
+  "i": [
+    {
+      "m": "web",
+      "c": "capture",
+      "a": {
+        "reason": {
+          "t": "select",
+          "va": "multiple"
+        }
+      }
+    }
+  ]
+}
