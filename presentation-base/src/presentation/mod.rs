@@ -71,7 +71,8 @@ pub struct Interaction {
 pub enum AttrType {
     TextArea,
     Signature {
-        m: SignatureMetadata,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        m: Option<SignatureMetadata>,
     },
     File,
     Radio {

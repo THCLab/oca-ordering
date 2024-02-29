@@ -1,0 +1,65 @@
+{
+  "v": "1.0.0",
+  "bd": "EG3s_Mu_DNK1awoe29rsB2EUKoYdOUyLKLOJ0xI3vHwK",
+  "l": [
+    "deu",
+    "eng",
+    "pol"
+  ],
+  "d": "EHxAZUjCot4x9aR4eQUKm418sbonWK4YvvZ9cfSPMNyN",
+  "p": [
+    {
+      "n": "signature",
+      "ao": [
+        "first_signature",
+        "second_signature"
+      ]
+    }
+  ],
+  "po": [
+    "signature"
+  ],
+  "pl": {
+    "eng": {
+      "signature": "Signatures"
+    },
+    "deu": {
+      "signature": "Unterschriften"
+    },
+    "pol": {
+      "signature": "Podpisy"
+    }
+  },
+  "i": [
+    {
+      "m": "web",
+      "c": "capture",
+      "a": {
+        "first_signature": {
+          "t": "signature",
+          "m": {
+            "canvas": "signature_canvas",
+            "geolocation": {
+              "latitude": "geolocation.latitude",
+              "longitude": "geolocation.longitude",
+              "accuracy": "geolocation.accuracy",
+              "timestamp": "timestamp"
+            }
+          }
+        },
+        "second_signature": {
+          "t": "signature",
+          "m": {
+            "canvas": "signature_canvas",
+            "geolocation": {
+              "latitude": "geolocation.latitude",
+              "longitude": "geolocation.longitude",
+              "accuracy": "geolocation.accuracy",
+              "timestamp": "timestamp"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
