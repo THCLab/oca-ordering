@@ -28,7 +28,6 @@ fn test_signature() {
     );
 }
 
-
 #[test]
 fn test_num() {
     let contents = fs::read_to_string("tests/presentation_examples/number.json")
@@ -36,9 +35,9 @@ fn test_num() {
 
     let pres = serde_json::from_str::<Presentation>(&contents);
     assert!(pres.is_ok());
+
     assert_eq!(
         contents,
         serde_json::to_string_pretty(&pres.unwrap()).unwrap()
     );
 }
-

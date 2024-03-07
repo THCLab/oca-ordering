@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use isolang::Language;
 use said::sad::{SerializationFormats, SAD};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 use serialization::opt_serialization;
 
 use crate::page::Page;
@@ -86,7 +86,37 @@ pub enum AttrType {
     Select {
         va: Cardinality,
     },
-    Number { r: [u32; 2], s: f32 }
+    Number {
+        r: Range,
+        s: f32,
+    },
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct Range([Option<f32>; 2]);
+use serde::ser::SerializeSeq;
+impl Serialize for Range {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        // Serialize the Range as an array of two elements
+        let mut seq = serializer.serialize_seq(Some(2))?;
+        let first = &self.0[0];
+        if first.map(|i| i.fract()) == Some(0.0) {
+            seq.serialize_element(&(first.map(|i| i as i32)))?;
+        } else {
+            seq.serialize_element(&first)?;
+        }
+        let second = &self.0[1];
+        if second.map(|i| i.fract()) == Some(0.0) {
+            seq.serialize_element(&(second.map(|i| i as i32)))?;
+        } else {
+            seq.serialize_element(&second)?;
+        }
+
+        seq.end()
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
