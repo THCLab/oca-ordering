@@ -1,0 +1,51 @@
+{
+  "v": "1.0.0",
+  "bd": "EG3s_Mu_DNK1awoe29rsB2EUKoYdOUyLKLOJ0xI3vHwK",
+  "l": [
+    "eng",
+    "pol",
+    "deu"
+  ],
+  "d": "EK0T5StXlcYwIhfp_wJxhIpYwYpEnMhHwnKbHnodhxFH",
+  "p": [
+    {
+      "n": "page 1",
+      "ao": [
+        "num"
+      ]
+    }
+  ],
+  "po": [
+    "page 1"
+  ],
+  "pl": {
+    "eng": {
+      "page 1": "First page"
+    },
+    "pol": {
+      "page 1": "Pierwsza strona"
+    },
+    "deu": {
+      "page 1": "Erste Seite"
+    },
+    "ita": {
+      "page 1": "Prima pagina"
+    }
+  },
+  "i": [
+    {
+      "m": "web",
+      "c": "capture",
+      "a": {
+        "num": {
+          "t": "number",
+          "r": [
+            0,
+            5
+          ],
+          "s": 0.5
+        }
+      }
+    }
+  ]
+}

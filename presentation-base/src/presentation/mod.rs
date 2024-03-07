@@ -86,6 +86,7 @@ pub enum AttrType {
     Select {
         va: Cardinality,
     },
+    Number { r: [u32; 2], s: f32 }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
