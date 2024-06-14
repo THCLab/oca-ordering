@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
 use isolang::Language;
 use said::sad::{SerializationFormats, SAD};
@@ -89,6 +89,10 @@ pub enum AttrType {
     Number {
         r: Range,
         s: f32,
+    },
+    Question {
+        answer: String,
+        o: HashMap<String, Vec<String>>,
     },
 }
 
@@ -449,5 +453,16 @@ mod tests {
         expected.retain(|c| !c.is_whitespace());
 
         assert_eq!(serialized, expected);
+    }
+
+    #[test]
+    fn test_attribute() {
+        let attr_str = r#"{
+                "t": "question",
+                "answer": "r",
+                "o": { "no": ["on_no_what", "on_no_when"], "maybe": ["on_maybe"] }
+              }"#;
+        let attr: AttrType = serde_json::from_str(&attr_str).unwrap();
+        assert!(matches!(attr, AttrType::Question { answer: _, o: _ }))
     }
 }
