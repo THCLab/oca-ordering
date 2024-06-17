@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 
 use isolang::Language;
 use said::sad::{SerializationFormats, SAD};
@@ -92,7 +92,7 @@ pub enum AttrType {
     },
     Question {
         answer: String,
-        o: HashMap<String, Vec<String>>,
+        o: IndexMap<String, Vec<String>>,
     },
 }
 
@@ -437,6 +437,11 @@ mod tests {
         },
         "customer.building.address.street": { 
           "t": "textarea" 
+        },
+        "question1": {
+          "t": "question",
+          "answer": "r",
+          "o": { "no": ["on_no_what", "on_no_when"], "maybe": ["on_maybe"] }
         }
       }
     }
