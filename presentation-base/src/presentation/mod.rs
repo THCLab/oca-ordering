@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 
 use isolang::Language;
 use said::sad::{SerializationFormats, SAD};
+use said::derivation::HashFunctionCode;
 use serde::{Deserialize, Serialize, Serializer};
 use serialization::opt_serialization;
 
@@ -41,7 +42,9 @@ pub struct Presentation {
 
 impl Presentation {
     pub fn validate_digest(&self) -> Result<(), PresentationError> {
-        let der_data = self.derivation_data();
+        let code = HashFunctionCode::Blake3_256;
+        let format = SerializationFormats::JSON;
+        let der_data = self.derivation_data(&code, &format);
         if self
             .said
             .as_ref()
